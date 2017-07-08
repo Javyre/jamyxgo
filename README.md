@@ -5,9 +5,19 @@ This is a wrapper of some [jamyxer](github.com/javyre/jamyxer) commands passed t
 
 # Installation
     go get github.com/javyre/jamyxgo
-    
+
 # Usage
 ```golang
 import "github.com/javyre/jamyxer"
+
+func main() {
+    session := jamyxgo.Session{}
+
+    // default port for jamyxer is 2909
+    session.Connect("127.0.0.1", 2909)
+
+    // Do stuff...
+}
 ```
-Usage should be pretty simple. Take a look at the source code. If there ever is demand, I could generate some docs or something.
+
+For documentation check out http://godoc.org/github.com/Javyre/jamyxgo
