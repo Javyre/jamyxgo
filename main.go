@@ -51,48 +51,58 @@ func (session* Session) SendCommand(cmd string, a ...interface{}) (reply string)
     return string(reply_b[:numbytes])
 }
 
-// Returns an array of strings representing the names of the input channels.
-func (session *Session) GetInputs() []string {
-    reply := strings.Trim(session.SendCommand("gi\n"), "\n")
+func getTargetType(isinput bool) string {
+    if isinput { return "i" }
+    return "o"
+}
+
+// ==== Get Channels ====
+
+// Returns an array of strings representing the names of the input/output channels.
+func (session *Session) GetChannels(isinput bool) []string {
+    reply := strings.Trim(session.SendCommand("g%s\n", getTargetType(isinput)), "\n")
     return strings.Split(reply, "\n")
 }
+// Returns an array of strings representing the names of the input channels.
+func (session *Session) GetInputs() []string { return session.GetChannels(true) }
+// Returns an array of strings representing the names of the output channels.
+func (session *Session) GetOutputs() []string { return session.GetChannels(false) }
 
+// ==== Set Volume ====
+
+// Set volume for specified input/output channel.
+func (session *Session) VolumeSet(isinput bool, channel string, volume float64) {
+    session.SendCommand("v%ss \"%s\" %f\n", getTargetType(isinput), channel, volume)
+}
 // Set volume for specified input channel.
-func (session *Session) VolumeInputSet(input string, volume float64) {
-    session.SendCommand("vis \"%s\" %f\n", input, volume)
-}
-
+func (session *Session) VolumeInputSet(input string, volume float64) { session.VolumeSet(true, input, volume) }
 // Set volume for specified output channel.
-func (session *Session) VolumeOutputSet(output string, volume float64) {
-    session.SendCommand("vos \"%s\" %f\n", output, volume)
-}
+func (session *Session) VolumeOutputSet(output string, volume float64) { session.VolumeSet(false, output, volume) }
 
+// ==== Get Volume ====
+
+// Get volume for specified input/output channel.
+func (session *Session) VolumeGet(isinput bool, channel string) float64 {
+    vol_s := session.SendCommand("v%sg \"%s\"\n", getTargetType(isinput), channel)
+    vol, _ := strconv.ParseFloat(vol_s, 64)
+    return vol
+}
 // Get volume for specified input channel.
-func (session *Session) VolumeInputGet(input string) float64 {
-    vol_s := session.SendCommand("vig \"%s\"\n", input)
-    vol, _ := strconv.ParseFloat(vol_s, 64)
-    return vol
-}
-
+func (session *Session) VolumeInputGet(input string) float64 { return session.VolumeGet(true, input) }
 // Get volume for specified output channel.
-func (session *Session) VolumeOutputGet(output string) float64 {
-    vol_s := session.SendCommand("vog \"%s\"\n", output)
+func (session *Session) VolumeOutputGet(output string) float64 { return session.VolumeGet(false, output) }
+
+// ==== Listeners ====
+// Listen for volume change for specified channel.
+// This is a blocking call waiting for a change in volume and returning it.
+func (session *Session) VolumeListen(isinput bool, channel string) float64 {
+    vol_s := session.SendCommand("v%sln \"%s\"\n", getTargetType(isinput), channel)
     vol, _ := strconv.ParseFloat(vol_s, 64)
     return vol
 }
-
 // Listen for volume for specified input channel.
 // This is a blocking call waiting for a change in volume and returning it.
-func (session *Session) VolumeInputListen(input string) float64 {
-    vol_s := session.SendCommand("listni \"%s\"\n", input)
-    vol, _ := strconv.ParseFloat(vol_s, 64)
-    return vol
-}
-
+func (session *Session) VolumeInputListen(input string) float64 { return session.VolumeListen(true, input) }
 // Listen for volume for specified output channel.
 // This is a blocking call waiting for a change in volume and returning it.
-func (session *Session) VolumeOutputListen(output string) float64 {
-    vol_s := session.SendCommand("listno \"%s\"\n", output)
-    vol, _ := strconv.ParseFloat(vol_s, 64)
-    return vol
-}
+func (session *Session) VolumeOutputListen(output string) float64 { return session.VolumeListen(false, output) }
