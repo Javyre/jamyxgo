@@ -47,6 +47,9 @@ func (session* Session) SendCommand(cmd string, a ...interface{}) (reply string)
     if err != nil {
         log.Fatal(err)
     }
+    if numbytes == 0 {
+        log.Fatal("Numbytes is 0!")
+    }
 
     return string(reply_b[:numbytes])
 }
@@ -91,6 +94,29 @@ func (session *Session) VolumeGet(isinput bool, channel string) float64 {
 func (session *Session) VolumeInputGet(input string) float64 { return session.VolumeGet(true, input) }
 // Get volume for specified output channel.
 func (session *Session) VolumeOutputGet(output string) float64 { return session.VolumeGet(false, output) }
+
+// ==== Set Connected ====
+
+// Connect input with output
+func (session *Session) Connect(input, output string) {
+    session.SendCommand(`c "%s" "%s"`, input, output)
+}
+// Toggle connection between input and output
+func (session *Session) ToggleConnection(input, output string) {
+    session.SendCommand(`tc "%s" "%s"`, input, output)
+}
+// Disconnect input and output
+func (session *Session) Disconnect(input, output string) {
+    session.SendCommand(`dc "%s" "%s"`, input, output)
+}
+
+// ==== Get Connected ====
+
+// Return true if output & input are connected
+func (session *Session) GetConnected(input, output string) bool {
+    ret := session.SendCommand(`gc "%s" "%s"`, output, input)
+    return ret == "1"
+}
 
 // ==== Listeners ====
 // Listen for volume change for specified channel.
