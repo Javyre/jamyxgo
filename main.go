@@ -113,7 +113,7 @@ func (session *Session) DisconnectIO(input, output string) {
 // ==== Get Connected ====
 
 // Return true if output & input are connected
-func (session *Session) GetConnected(input, output string) bool {
+func (session *Session) GetConnectedIO(input, output string) bool {
     ret := session.SendCommand(`gc "%s" "%s"`, output, input)
     return ret == "1"
 }
