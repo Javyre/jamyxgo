@@ -98,15 +98,15 @@ func (session *Session) VolumeOutputGet(output string) float64 { return session.
 // ==== Set Connected ====
 
 // Connect input with output
-func (session *Session) Connect(input, output string) {
+func (session *Session) ConnectIO(input, output string) {
     session.SendCommand(`c "%s" "%s"`, input, output)
 }
 // Toggle connection between input and output
-func (session *Session) ToggleConnection(input, output string) {
+func (session *Session) ToggleConnectionIO(input, output string) {
     session.SendCommand(`tc "%s" "%s"`, input, output)
 }
 // Disconnect input and output
-func (session *Session) Disconnect(input, output string) {
+func (session *Session) DisconnectIO(input, output string) {
     session.SendCommand(`dc "%s" "%s"`, input, output)
 }
 
