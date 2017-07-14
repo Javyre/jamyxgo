@@ -118,6 +118,29 @@ func (session *Session) GetConnectedIO(input, output string) bool {
     return ret == "1"
 }
 
+// ==== Set Monitor ====
+func (session *Session) SetMonitor(isinput bool, channel string) {
+    t := 'o'; if isinput { t = 'i' }
+    session.SendCommand(`mn%c "%s"`, t, channel)
+}
+
+// ==== Get Monitor ====
+
+// Get name of the channel being monitored
+func (session *Session) GetMonitorChannel() string {
+    return session.SendCommand("gmn");
+}
+// Get type of the channel being monitored
+func (session *Session) MonitorIsInput() bool {
+    return session.SendCommand("gmni") == "1"
+}
+// Get the channel being monitored name and type
+func (session *Session) GetMonitor() (isinput bool, channel string) {
+    isinput = session.MonitorIsInput()
+    channel = session.GetMonitorChannel()
+    return isinput, channel
+}
+
 // ==== Listeners ====
 // Listen for volume change for specified channel.
 // This is a blocking call waiting for a change in volume and returning it.
